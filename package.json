@@ -1,0 +1,33 @@
+{
+  "name": "vidsrctoapi",
+  "module": "index.ts",
+  "type": "module",
+  "scripts": {
+    "start": "bun run index.ts"
+  },
+  "devDependencies": {
+    "@types/bun": "latest",
+    "@types/superagent": "^8.1.6",
+    "@types/urlparser": "^0.2.3"
+  },
+  "peerDependencies": {
+    "typescript": "^5.0.0"
+  },
+  "dependencies": {
+    "axios": "^1.6.8",
+    "cheerio": "^1.0.0-rc.12",
+    "elysia": "^1.0.13",
+    "encoder": "^0.2.4",
+    "encoding": "^0.1.13",
+    "html-entities": "^2.5.2",
+    "iconv-lite": "^0.6.3",
+    "js-base64": "^3.7.7",
+    "node-fetch": "^3.3.2",
+    "puppeteer": "^22.6.3",
+    "puppeteer-extra": "^3.3.6",
+    "puppeteer-extra-plugin-stealth": "^2.11.2",
+    "query-string": "^9.0.0",
+    "superagent": "^8.1.2",
+    "urlparser": "^0.3.9"
+  }
+}
