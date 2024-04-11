@@ -1,9 +1,14 @@
 import request from "superagent";
 
 import * as cheerio from "cheerio";
-import { Elysia } from "elysia";
-import urlparser from "urlparser";
+
+import { init } from "@stricjs/app";
+
 import urlParser from "urlparser";
+
+import * as _ from "lodash"
+
+import randomUseragent from 'random-useragent';
 
 class CONSTANTS {
   static BASE_URL: string = "https://playsrc.xyz/";
@@ -24,20 +29,71 @@ interface sourcereq {
   };
 }
 
-new Elysia()
-  .get(
-    "/",
-    () =>
-      " [ route for fetching movies /movie/:tmdbId ] : [ route for fetching movies /tv/:tmdbId/:season/:ep ] "
-  )
+init({
+  routes: ["./src"],
 
-  .get("/movie/:tmdbId", async  ({ params: { tmdbId } }) => 
-     await main_func(`embed/movie/${tmdbId}`)
-   )
-  .get("/tv/:tmdbId/:season/:episode",async ({ params: { tmdbId, season, episode } })=>
-     await main_func(`embed/tv/${tmdbId}/${season}/${episode}`)
-  )
-  .listen(7000);
+  serve: { port: 8080 },
+});
+
+export const file_get = async (urlg: string) => {
+
+
+  const url = new URL(
+    `https://pdrz.v4507fb3559.site/_v2-mwxk/12a3c523fd105800ed8c394685aeeb0b962efc5c1be6e5e80c437baea93ece832257df1a4b6125fcfa38c35da05dee86aad28d46d73fc4e9d4e5a3385772f4d5338246f60549ed0a11c2b4bc6e4e7b5131358a7f56496989899fb80dcdf6789b7d14ae57116ca602/h/list;15a38634f803584ba8926411d7bee906856cab0654b5b6.m3u8`
+  );
+  const refererUrl = decodeURIComponent(url.searchParams.get("referer") || "");
+  const targetUrl = decodeURIComponent(url.searchParams.get("url") || "");
+  const originUrl = decodeURIComponent(url.searchParams.get("origin") || "");
+  const proxyAll = decodeURIComponent(url.searchParams.get("all") || "");
+
+  const response = await fetch(targetUrl, {
+    headers: {
+      "Access-Control-Allow-Origin": "*",
+      "Access-Control-Allow-Methods": "GET, HEAD, POST, PUT, DELETE, OPTIONS",
+      "Access-Control-Allow-Headers": "Content-Type",
+      Referer: refererUrl || "",
+      Origin: originUrl || "",
+    },
+  });
+
+  let modifiedM3u8;
+  if (targetUrl.includes(".m3u8")) {
+    modifiedM3u8 = await response.text();
+    const targetUrlTrimmed = `${encodeURIComponent(
+      targetUrl.replace(/([^/]+\.m3u8)$/, "").trim()
+    )}`;
+
+    const encodedUrl = encodeURIComponent(refererUrl);
+    const encodedOrigin = encodeURIComponent(originUrl);
+
+    modifiedM3u8 = modifiedM3u8
+      .split("\n")
+      .map((line) => {
+        if (line.startsWith("#") || line.trim() == "") {
+          return line;
+        } else if (proxyAll == "yes" && line.startsWith("http")) {
+          //https://yourproxy.com/?url=https://somevideo.m3u8&all=yes
+          return `${url.origin}?url=${line}`;
+        }
+        return `?url=${targetUrlTrimmed}${line}${
+          originUrl ? `&origin=${encodedOrigin}` : ""
+        }${refererUrl ? `&referer=${encodedUrl}` : ""}`;
+      })
+      .join("\n");
+
+    return {
+      body: modifiedM3u8 || response.body,
+      status: response.status,
+      statusText: response.statusText,
+      headers: {
+        alloworigin: "*",
+        contenttype:
+          response.headers?.get("Content-Type") ||
+          "application/vnd.apple.mpegurl",
+      },
+    };
+  }
+};
 
 const getdecodedurl = (url: string) => {
   const encoded: Buffer = getbase64(url);
@@ -138,59 +194,92 @@ const getVidplaySubtitles = async (url_data: string) => {
 
   var out = u.query.parts[0].split("=");
 
-  console.log();
+
 
   const conn = urlParser.parse(decodeURIComponent(out[1]));
+  
+  if (conn){
+    const resp = await request.get(`${CONSTANTS.BASE_URL}${conn.path.base}`);
+    
+    try{
+      const parse = JSON.parse(resp.text);
+      return parse
+    }
+    catch(e){
+      return []
+    }
+    
+  }else{
+    return []
+  }
 
-  const resp = await request.get(`${CONSTANTS.BASE_URL}${conn.path.base}`);
-
-  return JSON.parse(resp.text);
+ 
 };
 
-const main_func = async (endpnt : string) => {
-  const res = await request.get(`${CONSTANTS.BASE_URL}${endpnt}`);
-  const $ = cheerio.load(res?.text);
-  const data_id: string | undefined = $("a[data-id]").first().attr("data-id");
-  const get_source_id = await request.get(
-    `${CONSTANTS.BASE_URL}ajax/embed/episode/${data_id}/sources`
-  );
-  if (get_source_id) {
-    const source_id = await JSON.parse(get_source_id.text).result[0].id;
-
-    const geturl = await request.get(
-      `https://playsrc.xyz/ajax/embed/source/${source_id}`
+export const main_func = async (endpnt: string) => {
+  try{
+     
+    const res = await request.get(`${CONSTANTS.BASE_URL}${endpnt}`);
+    const $ = cheerio.load(res?.text);
+    const data_id: string | undefined = $("a[data-id]").first().attr("data-id");
+    const get_source_id = await request.get(
+      `${CONSTANTS.BASE_URL}ajax/embed/episode/${data_id}/sources`
     );
-    const url = await JSON.parse(geturl.text).result.url;
-
-    const decoded_url = getdecodedurl(url);
-
-    const cloud_keys = await request.get(
-      "https://raw.githubusercontent.com/Ciarands/vidsrc-keys/main/keys.json"
-    );
-
-    const [key1, key2] = await JSON.parse(cloud_keys.text);
-
-    const url_data = decoded_url.split("?");
-
-    const key = encodeid(url_data[0].split("/e/")[1], key1, key2);
-
-    const futoken = await getfutoken(decoded_url, key);
-    const subtitles: JSON = await getVidplaySubtitles(decoded_url);
-
-    const fetchlinks = await request
-      .get(
-        `${CONSTANTS.PROVIDER_URL}/mediainfo/${futoken}?${url_data[1]}&autostart=true`
-      )
-      .set({ Referer: decoded_url });
-
-    const finaljson: sourcereq | undefined = JSON.parse(fetchlinks.text);
-
-    // console.log(JSON.parse(fetchlinks.text));
-    if (finaljson) {
-      return {
-        source: finaljson.result.sources[0].file,
-        subtitles: subtitles,
-      };
+  
+  
+    if (get_source_id) {
+      const source_id = await JSON.parse(get_source_id.text).result[0].id;
+  
+      const geturl = await request.get(
+        `https://playsrc.xyz/ajax/embed/source/${source_id}`
+      );
+      const url = await JSON.parse(geturl.text).result.url;
+  
+      const decoded_url = getdecodedurl(url);
+  
+      const cloud_keys = await request.get(
+        "https://raw.githubusercontent.com/Ciarands/vidsrc-keys/main/keys.json"
+      );
+  
+      const [key1, key2] = await JSON.parse(cloud_keys.text);
+  
+      const url_data = decoded_url.split("?");
+  
+      const key = encodeid(url_data[0].split("/e/")[1], key1, key2);
+  
+      const futoken = await getfutoken(decoded_url, key);
+      const subtitles: JSON = await getVidplaySubtitles(decoded_url);
+      const ip = (Math.floor(Math.random() * 255) + 1)+"."+(Math.floor(Math.random() * 255))+"."+(Math.floor(Math.random() * 255))+"."+(Math.floor(Math.random() * 255));
+    
+  
+      const fetchlinks = await request
+        .get(
+          `${CONSTANTS.PROVIDER_URL}/mediainfo/${futoken}?${url_data[1]}&autostart=true`
+        )
+        .set({ referer: decoded_url })
+        .set({ origin : ip})
+        .set({host : "vidplay.online"})
+        
+        
+        ;
+  
+      const finaljson: sourcereq | undefined = JSON.parse(fetchlinks.text);
+  
+      // console.log(JSON.parse(fetchlinks.text));
+      if (finaljson) {
+      
+        return {
+          source: finaljson.result.sources[0].file,
+          subtitles: subtitles,
+          status: 200
+        };
+      }
+    }
+  }catch(e){
+    return {
+      status: 404
     }
   }
+
+
 };

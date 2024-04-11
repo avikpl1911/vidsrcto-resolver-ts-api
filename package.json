@@ -3,7 +3,7 @@
   "module": "index.ts",
   "type": "module",
   "scripts": {
-    "start": "bun run index.ts"
+    "start": "bun --watch index.ts"
   },
   "devDependencies": {
     "@types/bun": "latest",
@@ -14,19 +14,29 @@
     "typescript": "^5.0.0"
   },
   "dependencies": {
+    "@stricjs/app": "^1.0.0-rc.34",
+    "@stricjs/router": "^5.0.6",
+    "@stricjs/utils": "^2.0.7",
+    "@types/lodash": "^4.17.0",
+    "@types/random-useragent": "^0.3.3",
     "axios": "^1.6.8",
     "cheerio": "^1.0.0-rc.12",
     "elysia": "^1.0.13",
     "encoder": "^0.2.4",
     "encoding": "^0.1.13",
     "html-entities": "^2.5.2",
+    "i": "^0.3.7",
     "iconv-lite": "^0.6.3",
     "js-base64": "^3.7.7",
+    "lodash": "^4.17.21",
+    "lodash-contrib": "^4.1200.1",
     "node-fetch": "^3.3.2",
+    "npm": "^10.5.2",
     "puppeteer": "^22.6.3",
     "puppeteer-extra": "^3.3.6",
     "puppeteer-extra-plugin-stealth": "^2.11.2",
     "query-string": "^9.0.0",
+    "random-useragent": "^0.5.0",
     "superagent": "^8.1.2",
     "urlparser": "^0.3.9"
   }
