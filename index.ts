@@ -2,13 +2,46 @@ import request from "superagent";
 
 import * as cheerio from "cheerio";
 
-import { init } from "@stricjs/app";
+import express, { Request, Response } from "express";
+
+import cors from "cors"
 
 import urlParser from "urlparser";
 
-import * as _ from "lodash"
+import * as _ from "lodash";
+import { Application } from "express";
 
-import randomUseragent from 'random-useragent';
+const app: Application = express();
+
+const port = process.env.PORT || 8080;
+
+app
+  .use(cors())
+  .get("/movie/:tmdbId", async (req: Request, res: Response) => {
+    const resp = await main_func(`embed/movie/${req.params.tmdbId}`);
+
+    if (resp) {
+      res.json(resp);
+    } else {
+      res.json({});
+    }
+  })
+
+  .get("tv/:tmdbId/:season/:episode", async (req: Request, res: Response) => {
+    const resp = await main_func(
+      `embed/tv/${req.params.tmdbId}/${req.params.season}/${req.params.episode}`
+    );
+
+    if (resp) {
+      res.json(resp);
+    } else {
+      res.json({});
+    }
+  })
+
+  .listen(port, () => {
+    console.log(`server is running on port http//localhost:${port}`);
+  });
 
 class CONSTANTS {
   static BASE_URL: string = "https://playsrc.xyz/";
@@ -36,8 +69,6 @@ interface sourcereq {
 // });
 
 export const file_get = async (urlg: string) => {
-
-
   const url = new URL(
     `https://pdrz.v4507fb3559.site/_v2-mwxk/12a3c523fd105800ed8c394685aeeb0b962efc5c1be6e5e80c437baea93ece832257df1a4b6125fcfa38c35da05dee86aad28d46d73fc4e9d4e5a3385772f4d5338246f60549ed0a11c2b4bc6e4e7b5131358a7f56496989899fb80dcdf6789b7d14ae57116ca602/h/list;15a38634f803584ba8926411d7bee906856cab0654b5b6.m3u8`
   );
@@ -194,92 +225,85 @@ const getVidplaySubtitles = async (url_data: string) => {
 
   var out = u.query.parts[0].split("=");
 
-
-
   const conn = urlParser.parse(decodeURIComponent(out[1]));
-  
-  if (conn){
-    const resp = await request.get(`${CONSTANTS.BASE_URL}${conn.path.base}`);
-    
-    try{
-      const parse = JSON.parse(resp.text);
-      return parse
-    }
-    catch(e){
-      return []
-    }
-    
-  }else{
-    return []
-  }
 
- 
+  if (conn) {
+    const resp = await request.get(`${CONSTANTS.BASE_URL}${conn.path.base}`);
+
+    try {
+      const parse = JSON.parse(resp.text);
+      return parse;
+    } catch (e) {
+      return [];
+    }
+  } else {
+    return [];
+  }
 };
 
 export const main_func = async (endpnt: string) => {
-  try{
-     
+  try {
     const res = await request.get(`${CONSTANTS.BASE_URL}${endpnt}`);
     const $ = cheerio.load(res?.text);
     const data_id: string | undefined = $("a[data-id]").first().attr("data-id");
     const get_source_id = await request.get(
       `${CONSTANTS.BASE_URL}ajax/embed/episode/${data_id}/sources`
     );
-  
-  
+
     if (get_source_id) {
       const source_id = await JSON.parse(get_source_id.text).result[0].id;
-  
+
       const geturl = await request.get(
         `https://playsrc.xyz/ajax/embed/source/${source_id}`
       );
       const url = await JSON.parse(geturl.text).result.url;
-  
+
       const decoded_url = getdecodedurl(url);
-  
+
       const cloud_keys = await request.get(
         "https://raw.githubusercontent.com/Ciarands/vidsrc-keys/main/keys.json"
       );
-  
+
       const [key1, key2] = await JSON.parse(cloud_keys.text);
-  
+
       const url_data = decoded_url.split("?");
-  
+
       const key = encodeid(url_data[0].split("/e/")[1], key1, key2);
-  
+
       const futoken = await getfutoken(decoded_url, key);
       const subtitles: JSON = await getVidplaySubtitles(decoded_url);
-      const ip = (Math.floor(Math.random() * 255) + 1)+"."+(Math.floor(Math.random() * 255))+"."+(Math.floor(Math.random() * 255))+"."+(Math.floor(Math.random() * 255));
-    
-  
+      const ip =
+        Math.floor(Math.random() * 255) +
+        1 +
+        "." +
+        Math.floor(Math.random() * 255) +
+        "." +
+        Math.floor(Math.random() * 255) +
+        "." +
+        Math.floor(Math.random() * 255);
+
       const fetchlinks = await request
         .get(
           `${CONSTANTS.PROVIDER_URL}/mediainfo/${futoken}?${url_data[1]}&autostart=true`
         )
         .set({ referer: decoded_url })
-        .set({ origin : ip})
-        .set({host : "vidplay.online"})
-        
-        
-        ;
-  
+        .set({ origin: ip })
+        .set({ host: "vidplay.online" });
+
       const finaljson: sourcereq | undefined = JSON.parse(fetchlinks.text);
-  
+
       // console.log(JSON.parse(fetchlinks.text));
       if (finaljson) {
-      
         return {
           source: finaljson.result.sources[0].file,
           subtitles: subtitles,
-          status: 200
+          status: 200,
         };
       }
     }
-  }catch(e){
+  } catch (e) {
     return {
-      status: 404
-    }
+      status: 404,
+    };
   }
-
-
 };

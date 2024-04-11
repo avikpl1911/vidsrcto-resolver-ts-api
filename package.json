@@ -1,46 +1,33 @@
 {
-  "name": "vidsrctoapi",
-  "module": "index.ts",
-  "type": "module",
+  "name": "vidsrcto-resolver-ts-api",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.ts",
   "scripts": {
-    "start": "bun --watch index.ts",
-    "build": "bun-vercel ./index.ts"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "npx tsc",
+    "start": "nodemon dist/index.js",
+    "dev": "nodemon index.ts"
   },
-  "devDependencies": {
-    "@types/bun": "latest",
-    "@types/superagent": "^8.1.6",
-    "@types/urlparser": "^0.2.3",
-    "bun-vercel": "^1.0.0-alpha.5"
-  },
-  "peerDependencies": {
-    "typescript": "^5.0.0"
-  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
   "dependencies": {
-    "@stricjs/app": "^1.0.0-rc.34",
-    "@stricjs/router": "^5.0.6",
-    "@stricjs/utils": "^2.0.7",
-    "@types/lodash": "^4.17.0",
-    "@types/random-useragent": "^0.3.3",
-    "axios": "^1.6.8",
-  
     "cheerio": "^1.0.0-rc.12",
-    "elysia": "^1.0.13",
-    "encoder": "^0.2.4",
-    "encoding": "^0.1.13",
-    "html-entities": "^2.5.2",
-    "i": "^0.3.7",
-    "iconv-lite": "^0.6.3",
-    "js-base64": "^3.7.7",
+    "cors": "^2.8.5",
+    "express": "^4.19.2",
     "lodash": "^4.17.21",
-    "lodash-contrib": "^4.1200.1",
-    "node-fetch": "^3.3.2",
-    "npm": "^10.5.2",
-    "puppeteer": "^22.6.3",
-    "puppeteer-extra": "^3.3.6",
-    "puppeteer-extra-plugin-stealth": "^2.11.2",
-    "query-string": "^9.0.0",
-    "random-useragent": "^0.5.0",
+    "nodemon": "^3.1.0",
     "superagent": "^8.1.2",
     "urlparser": "^0.3.9"
+  },
+  "devDependencies": {
+    "@types/cors": "^2.8.17",
+    "@types/express": "^4.17.21",
+    "@types/lodash": "^4.17.0",
+    "@types/superagent": "^8.1.6",
+    "@types/urlparser": "^0.2.3",
+    "ts-node-dev": "^2.0.0",
+    "typescript": "^5.4.5"
   }
 }
