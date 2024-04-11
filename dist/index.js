@@ -35,21 +35,22 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.main_func = exports.file_get = void 0;
 const superagent_1 = __importDefault(require("superagent"));
 const cheerio = __importStar(require("cheerio"));
 const express_1 = __importDefault(require("express"));
 const cors_1 = __importDefault(require("cors"));
 const urlparser_1 = __importDefault(require("urlparser"));
+const dotenv_1 = __importDefault(require("dotenv"));
 const app = (0, express_1.default)();
 const port = process.env.PORT || 8080;
+dotenv_1.default.config();
 app
     .use((0, cors_1.default)())
     .get('/', (req, res) => {
     res.send("hello from A1ze");
 })
     .get("/movie/:tmdbId", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const resp = yield (0, exports.main_func)(`embed/movie/${req.params.tmdbId}`);
+    const resp = yield main_func(`embed/movie/${req.params.tmdbId}`);
     if (resp) {
         res.json(resp);
     }
@@ -58,7 +59,7 @@ app
     }
 }))
     .get("tv/:tmdbId/:season/:episode", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const resp = yield (0, exports.main_func)(`embed/tv/${req.params.tmdbId}/${req.params.season}/${req.params.episode}`);
+    const resp = yield main_func(`embed/tv/${req.params.tmdbId}/${req.params.season}/${req.params.episode}`);
     if (resp) {
         res.json(resp);
     }
@@ -126,7 +127,6 @@ const file_get = (urlg) => __awaiter(void 0, void 0, void 0, function* () {
         };
     }
 });
-exports.file_get = file_get;
 const getdecodedurl = (url) => {
     const encoded = getbase64(url);
     const decoded = getdecoded(encoded, CONSTANTS.DEFAULT_KEY);
@@ -257,5 +257,4 @@ const main_func = (endpnt) => __awaiter(void 0, void 0, void 0, function* () {
         };
     }
 });
-exports.main_func = main_func;
 //# sourceMappingURL=index.js.map

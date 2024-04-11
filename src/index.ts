@@ -77,7 +77,7 @@ interface sourcereq {
 //   serve: { port: 8080 },
 // });
 
-export const file_get = async (urlg: string) => {
+const file_get = async (urlg: string) => {
   const url = new URL(
     `https://pdrz.v4507fb3559.site/_v2-mwxk/12a3c523fd105800ed8c394685aeeb0b962efc5c1be6e5e80c437baea93ece832257df1a4b6125fcfa38c35da05dee86aad28d46d73fc4e9d4e5a3385772f4d5338246f60549ed0a11c2b4bc6e4e7b5131358a7f56496989899fb80dcdf6789b7d14ae57116ca602/h/list;15a38634f803584ba8926411d7bee906856cab0654b5b6.m3u8`
   );
@@ -250,7 +250,7 @@ const getVidplaySubtitles = async (url_data: string) => {
   }
 };
 
-export const main_func = async (endpnt: string) => {
+const main_func = async (endpnt: string) => {
   try {
     const res = await request.get(`${CONSTANTS.BASE_URL}${endpnt}`);
     const $ = cheerio.load(res?.text);
