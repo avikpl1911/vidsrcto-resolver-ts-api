@@ -29,11 +29,11 @@ interface sourcereq {
   };
 }
 
-init({
-  routes: ["./src"],
+// init({
+//   routes: ["./src"],
 
-  serve: { port: 8080 },
-});
+//   serve: { port: 8080 },
+// });
 
 export const file_get = async (urlg: string) => {
 
