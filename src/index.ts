@@ -36,7 +36,7 @@ app
     }
   })
 
-  .get("tv/:tmdbId/:season/:episode", async (req: Request, res: Response) => {
+  .get("/tv/:tmdbId/:season/:episode", async (req: Request, res: Response) => {
     const resp = await main_func(
       `embed/tv/${req.params.tmdbId}/${req.params.season}/${req.params.episode}`
     );
