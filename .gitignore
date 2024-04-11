@@ -118,7 +118,7 @@ out
 # Nuxt.js build / generate output
 
 .nuxt
-dist
+
 
 # Gatsby files
 
@@ -173,5 +173,7 @@ dist
 
 # Finder (MacOS) folder config
 .DS_Store
+
+.vercel
 
 .vercel

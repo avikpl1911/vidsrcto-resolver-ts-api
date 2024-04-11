@@ -8,6 +8,8 @@ import cors from "cors"
 
 import urlParser from "urlparser";
 
+import dotenv from "dotenv"
+
 import * as _ from "lodash";
 import { Application } from "express";
 
@@ -15,8 +17,15 @@ const app: Application = express();
 
 const port = process.env.PORT || 8080;
 
+dotenv.config()
+
 app
   .use(cors())
+  
+  .get('/',(req: Request , res : Response)=>{
+    res.send("hello from A1ze")
+  })
+
   .get("/movie/:tmdbId", async (req: Request, res: Response) => {
     const resp = await main_func(`embed/movie/${req.params.tmdbId}`);
 
