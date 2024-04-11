@@ -58,7 +58,7 @@ app
         res.json({});
     }
 }))
-    .get("tv/:tmdbId/:season/:episode", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    .get("/tv/:tmdbId/:season/:episode", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const resp = yield main_func(`embed/tv/${req.params.tmdbId}/${req.params.season}/${req.params.episode}`);
     if (resp) {
         res.json(resp);
