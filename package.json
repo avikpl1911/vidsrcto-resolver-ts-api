@@ -3,12 +3,14 @@
   "module": "index.ts",
   "type": "module",
   "scripts": {
-    "start": "bun --watch index.ts"
+    "start": "bun --watch index.ts",
+    "build": "bun-vercel ./index.ts"
   },
   "devDependencies": {
     "@types/bun": "latest",
     "@types/superagent": "^8.1.6",
-    "@types/urlparser": "^0.2.3"
+    "@types/urlparser": "^0.2.3",
+    "bun-vercel": "^1.0.0-alpha.5"
   },
   "peerDependencies": {
     "typescript": "^5.0.0"
@@ -20,6 +22,7 @@
     "@types/lodash": "^4.17.0",
     "@types/random-useragent": "^0.3.3",
     "axios": "^1.6.8",
+  
     "cheerio": "^1.0.0-rc.12",
     "elysia": "^1.0.13",
     "encoder": "^0.2.4",
